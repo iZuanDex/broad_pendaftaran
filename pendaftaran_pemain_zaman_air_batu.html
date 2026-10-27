@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Pemain - Ekspedisi Zaman Air Batu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito for Ice Age Theme -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        ice: ['Fredoka', 'sans-serif'],
+                        heading: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        ice: {
+                            100: '#E0F7FA',
+                            200: '#B2EBF2',
+                            300: '#80DEEA',
+                            400: '#4DD0E1',
+                            500: '#26C6DA',
+                            600: '#00ACC1',
+                            700: '#00838F',
+                            800: '#006064',
+                            900: '#00363A',
+                        },
+                        glacier: {
+                            light: '#E6F0FA',
+                            DEFAULT: '#90CDF4',
+                            dark: '#2B6CB0',
+                        }
+                    },
+                    boxShadow: {
+                        'ice-glow': '0 0 25px rgba(0, 229, 255, 0.5)',
+                        'ice-card': '0 8px 32px 0 rgba(0, 180, 216, 0.37)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #0b192c 0%, #1e3e62 50%, #001f3f 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Snow Background Canvas */
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Effect */
+        .ice-glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 180, 216, 0.35);
+        }
+
+        .ice-glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(186, 230, 253, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ice-glass-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+
+        .char-selected {
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.25) !important;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8) !important;
+            transform: scale(1.03);
+        }
+
+        /* Frost animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="relative pb-16">
+    <!-- Canvas untuk Efek Salji -->
+    <canvas id="snow-canvas"></canvas>
+
+    <div class="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Header Banner -->
+        <header class="text-center mb-10 animate-float">
+            <div class="inline-flex items-center gap-3 bg-cyan-900/60 border border-cyan-400/40 px-6 py-2 rounded-full mb-3 text-cyan-200 text-sm font-semibold tracking-wide shadow-lg backdrop-blur-md">
+                <i class="fa-solid font-bold fa-snowflake text-cyan-300 animate-spin" style="animation-duration: 10s;"></i> 
+                EKSPEDISI ZAMAN AIR BATU
+                <i class="fa-solid font-bold fa-snowflake text-cyan-300 animate-spin" style="animation-duration: 10s;"></i>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black font-heading text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-sky-100 to-blue-300 drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)] tracking-wide">
+                BOARD PENDAFTARAN PENJELAJAH
+            </h1>
+            <p class="text-cyan-100 text-base md:text-lg mt-2 max-w-xl mx-auto font-medium">
+                Sertai kembara menembusi belantara ais purba! Pilih watak anda dan daftarkan diri untuk memulakan misi.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Borang Pendaftaran (Kiri/Utama) -->
+            <section class="lg:col-span-7">
+                <div class="ice-glass rounded-3xl p-6 md:p-8 relative overflow-hidden">
+                    
+                    <!-- Hiasan Ais Corner -->
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <h2 class="text-2xl font-bold font-heading mb-6 text-cyan-100 flex items-center gap-3 border-b border-cyan-500/30 pb-3">
+                        <i class="fa-solid fa-id-card text-cyan-300"></i> Borang Pendaftar Penjelajah
+                    </h2>
+
+                    <form id="registrationForm" onsubmit="handleRegister(event)" class="space-y-6">
+                        
+                        <!-- 1. Pemilihan Watak -->
+                        <div>
+                            <label class="block text-cyan-200 font-semibold mb-3 text-sm tracking-wider uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-users text-cyan-400"></i> 1. Pilih Watak Anda
+                            </label>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Watak 1: Aiman -->
+                                <div onclick="selectCharacter('Aiman sang Penjelajah', 'aiman', this)" 
+                                     class="char-card ice-glass-card rounded-2xl p-4 text-center cursor-pointer relative group">
+                                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-3xl shadow-md border-2 border-white/50 group-hover:scale-110 transition-transform">
+                                        🧭
+                                    </div>
+                                    <h3 class="font-bold text-lg text-white">Aiman</h3>
+                                    <p class="text-xs text-cyan-200 font-medium mt-1">Sang Penjelajah</p>
+                                    <span class="mt-2 inline-block px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[10px] border border-amber-400/30">Pemberani & Tangkas</span>
+                                </div>
+
+                                <!-- Watak 2: Fatin -->
+                                <div onclick="selectCharacter('Fatin sang Navigator', 'fatin', this)" 
+                                     class="char-card ice-glass-card rounded-2xl p-4 text-center cursor-pointer relative group">
+                                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-tr from-teal-500 to-emerald-300 flex items-center justify-center text-3xl shadow-md border-2 border-white/50 group-hover:scale-110 transition-transform">
+                                        🗺️
+                                    </div>
+                                    <h3 class="font-bold text-lg text-white">Fatin</h3>
+                                    <p class="text-xs text-cyan-200 font-medium mt-1">Sang Navigator</p>
+                                    <span class="mt-2 inline-block px-2 py-0.5 bg-teal-500/20 text-teal-300 rounded text-[10px] border border-teal-400/30">Bijak & Bijaksana</span>
+                                </div>
+
+                                <!-- Watak 3: Momo -->
+                                <div onclick="selectCharacter('Momo si Gajah Purba', 'momo', this)" 
+                                     class="char-card ice-glass-card rounded-2xl p-4 text-center cursor-pointer relative group">
+                                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-tr from-sky-600 to-indigo-400 flex items-center justify-center text-3xl shadow-md border-2 border-white/50 group-hover:scale-110 transition-transform">
+                                        🦣
+                                    </div>
+                                    <h3 class="font-bold text-lg text-white">Momo</h3>
+                                    <p class="text-xs text-cyan-200 font-medium mt-1">Si Gajah Purba</p>
+                                    <span class="mt-2 inline-block px-2 py-0.5 bg-sky-500/20 text-sky-300 rounded text-[10px] border border-sky-400/30">Kuat & Setia</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedCharacterInput" required>
+                        </div>
+
+                        <!-- 2. Ruang Nama & Kelas -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="playerName" class="block text-cyan-200 font-semibold mb-2 text-sm tracking-wider uppercase">
+                                    <i class="fa-solid fa-user text-cyan-400"></i> Nama Penjelajah
+                                </label>
+                                <input type="text" id="playerName" placeholder="Contoh: Muhammad Ali" required
+                                    class="w-full bg-slate-900/60 border border-cyan-500/40 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition">
+                            </div>
+
+                            <div>
+                                <label for="playerClass" class="block text-cyan-200 font-semibold mb-2 text-sm tracking-wider uppercase">
+                                    <i class="fa-solid fa-school text-cyan-400"></i> Nama Kelas
+                                </label>
+                                <input type="text" id="playerClass" placeholder="Contoh: 4 Cemerlang" required
+                                    class="w-full bg-slate-900/60 border border-cyan-500/40 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30 transition">
+                            </div>
+                        </div>
+
+                        <!-- 3. Ikrar Kapten -->
+                        <div class="p-4 rounded-2xl bg-cyan-950/70 border border-cyan-400/30 shadow-inner">
+                            <label class="flex items-start gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="pledgeCheckbox" required class="mt-1 w-5 h-5 accent-cyan-400 rounded cursor-pointer">
+                                <div>
+                                    <span class="font-bold text-yellow-300 text-base flex items-center gap-2">
+                                        ✋ IKRAR KAPTEN
+                                    </span>
+                                    <p class="text-cyan-100 font-semibold text-sm md:text-base italic mt-1 bg-cyan-900/40 p-2 rounded-lg border border-cyan-500/20">
+                                        "Saya akan menyiapkan SEMUA Misi Penjelajahan!"
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Butang Hantar -->
+                        <button type="submit" 
+                            class="w-full py-4 bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-black text-lg rounded-xl shadow-lg hover:shadow-cyan-400/50 transition duration-300 flex items-center justify-center gap-3 tracking-wide">
+                            <i class="fa-solid fa-compass text-slate-950 text-xl"></i> SERTAI EKSPEDISI SEKARANG
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Senarai Pendaftaran Penjelajah (Kanan) -->
+            <section class="lg:col-span-5">
+                <div class="ice-glass rounded-3xl p-6 relative h-full flex flex-col">
+                    <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-4">
+                        <h2 class="text-2xl font-bold font-heading text-cyan-100 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-cyan-300"></i> Senarai Penjelajah
+                        </h2>
+                        <span id="playerCounter" class="bg-cyan-500/30 text-cyan-200 border border-cyan-400/40 px-3 py-1 rounded-full text-xs font-bold">
+                            0 Penjelajah
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-cyan-200/80 mb-4">
+                        Senarai ini dikemaskini secara automatik sejurus pendaftaran berjaya dibuat!
+                    </p>
+
+                    <!-- Container Senarai -->
+                    <div id="explorerList" class="space-y-3 flex-grow overflow-y-auto max-h-[500px] pr-1">
+                        <!-- State Kosong / Default -->
+                        <div id="emptyState" class="text-center py-12 px-4 border-2 border-dashed border-cyan-500/30 rounded-2xl bg-cyan-950/20">
+                            <i class="fa-solid fa-icicles text-4xl text-cyan-400/50 mb-3 animate-bounce"></i>
+                            <p class="text-cyan-200 font-semibold text-sm">Belum ada penjelajah mendaftar.</p>
+                            <p class="text-cyan-400/70 text-xs mt-1">Jadilah kapten pertama mendaftar di Zaman Air Batu ini!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal Notifikasi Kebenaran Ikrar -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-300/40">
+            <i class="fa-solid fa-[#000] fa-circle-check text-2xl text-emerald-100"></i>
+            <div>
+                <h4 class="font-bold text-sm">Pendaftaran Berjaya!</h4>
+                <p class="text-xs text-emerald-100" id="toastMessage">Selamat datang ke Pasukan Penjelajah Zaman Air Batu.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store Senarai Pemain dalam Memori (Single-Session)
+        let explorers = [];
+        let selectedChar = null;
+
+        // Inisialisasi Tone.js untuk Sound Effect
+        let synth;
+        function playIceSound(freq = "C5", duration = "8n") {
+            try {
+                if (!synth) {
+                    synth = new Tone.Synth({
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 }
+                    }).toDestination();
+                }
+                Tone.start();
+                synth.triggerAttackRelease(freq, duration);
+            } catch (e) {
+                console.log("Audio contextual block handled");
+            }
+        }
+
+        // Pilih Watak
+        function selectCharacter(charName, charKey, element) {
+            playIceSound("E5", "16n");
+            
+            // Unselect all cards
+            document.querySelectorAll('.char-card').forEach(card => {
+                card.classList.remove('char-selected');
+            });
+
+            // Select clicked card
+            element.classList.add('char-selected');
+            selectedChar = {
+                name: charName,
+                key: charKey
+            };
+            
+            document.getElementById('selectedCharacterInput').value = charName;
+        }
+
+        // Handle Pendaftaran Form
+        function handleRegister(event) {
+            event.preventDefault();
+
+            const nameInput = document.getElementById('playerName');
+            const classInput = document.getElementById('playerClass');
+            const pledgeInput = document.getElementById('pledgeCheckbox');
+
+            if (!selectedChar) {
+                showToast("Sila pilih watak penjelajah anda dahulu!", true);
+                playIceSound("A3", "8n");
+                return;
+            }
+
+            if (!pledgeInput.checked) {
+                showToast("Sila tanda sokongan pada Ikrar Kapten!", true);
+                return;
+            }
+
+            // Cipta Objek Penjelajah Baru
+            const newExplorer = {
+                id: Date.now(),
+                name: nameInput.value.trim(),
+                className: classInput.value.trim(),
+                character: selectedChar.name,
+                characterKey: selectedChar.key,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            // Tambah ke array
+            explorers.unshift(newExplorer);
+
+            // Bunyi Kejayaan Pendaftaran
+            playIceSound("G5", "8n");
+            setTimeout(() => playIceSound("C6", "4n"), 100);
+
+            // Render Senarai Baru
+            renderExplorers();
+
+            // Tunjukkan Notifikasi
+            showToast(`${newExplorer.name} (${newExplorer.className}) telah didaftarkan!`);
+
+            // Reset Form ringan
+            nameInput.value = '';
+            classInput.value = '';
+            pledgeInput.checked = false;
+            document.querySelectorAll('.char-card').forEach(card => card.classList.remove('char-selected'));
+            document.getElementById('selectedCharacterInput').value = '';
+            selectedChar = null;
+        }
+
+        // Render Senarai Penjelajah (Auto-Update UI)
+        function renderExplorers() {
+            const container = document.getElementById('explorerList');
+            const counter = document.getElementById('playerCounter');
+
+            counter.innerText = `${explorers.length} Penjelajah`;
+
+            if (explorers.length === 0) {
+                container.innerHTML = `
+                    <div id="emptyState" class="text-center py-12 px-4 border-2 border-dashed border-cyan-500/30 rounded-2xl bg-cyan-950/20">
+                        <i class="fa-solid fa-icicles text-4xl text-cyan-400/50 mb-3 animate-bounce"></i>
+                        <p class="text-cyan-200 font-semibold text-sm">Belum ada penjelajah mendaftar.</p>
+                        <p class="text-cyan-400/70 text-xs mt-1">Jadilah kapten pertama mendaftar di Zaman Air Batu ini!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Dapatkan Ikon watak
+            const getCharIcon = (key) => {
+                switch(key) {
+                    case 'aiman': return '🧭';
+                    case 'fatin': return '🗺️';
+                    case 'momo': return '🦣';
+                    default: return '❄️';
+                }
+            };
+
+            const getBadgeColor = (key) => {
+                switch(key) {
+                    case 'aiman': return 'bg-amber-500/20 border-amber-400/30 text-amber-300';
+                    case 'fatin': return 'bg-teal-500/20 border-teal-400/30 text-teal-300';
+                    case 'momo': return 'bg-sky-500/20 border-sky-400/30 text-sky-300';
+                    default: return 'bg-cyan-500/20 border-cyan-400/30 text-cyan-300';
+                }
+            };
+
+            container.innerHTML = explorers.map((exp, index) => `
+                <div class="ice-glass-card rounded-2xl p-4 flex items-center justify-between gap-3 animate-fade-in border-l-4 border-l-cyan-400">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="text-2xl w-10 h-10 rounded-full bg-cyan-950/80 flex items-center justify-center border border-cyan-400/40 flex-shrink-0">
+                            ${getCharIcon(exp.characterKey)}
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-white text-base truncate">${escapeHtml(exp.name)}</h4>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs text-cyan-200 font-medium">Kelas: ${escapeHtml(exp.className)}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full border ${getBadgeColor(exp.characterKey)} font-semibold">
+                                    ${escapeHtml(exp.character)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="text-[10px] text-cyan-300/80 bg-cyan-950/60 px-2 py-1 rounded-md border border-cyan-500/20 block">
+                            ${exp.time}
+                        </span>
+                        <span class="text-[9px] text-emerald-400 flex items-center justify-end gap-1 mt-1 font-semibold">
+                            <i class="fa-solid fa-check"></i> Berikrar
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Safe HTML Sanitization
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Tunjuk Toast Alert
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.innerText = msg;
+
+            if (isError) {
+                toast.firstElementChild.className = "bg-gradient-to-r from-rose-600 to-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-300/40";
+            } else {
+                toast.firstElementChild.className = "bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-300/40";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+
+        // Canvas Effect: Animasi Salji Gugur (Zaman Air Batu)
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let flakes = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        function createFlakes() {
+            flakes = [];
+            const count = Math.floor((width * height) / 10000);
+            for (let i = 0; i < count; i++) {
+                flakes.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: Math.random() * 3 + 1,
+                    d: Math.random() * 1 + 0.5,
+                    opacity: Math.random() * 0.7 + 0.3
+                });
+            }
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.beginPath();
+            
+            for (let i = 0; i < flakes.length; i++) {
+                const f = flakes[i];
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+            }
+            ctx.fill();
+            updateSnow();
+        }
+
+        function updateSnow() {
+            for (let i = 0; i < flakes.length; i++) {
+                const f = flakes[i];
+                f.y += Math.pow(f.d, 2) + 0.5;
+                f.x += Math.sin(f.y / 30) * 0.5;
+
+                if (f.y > height) {
+                    flakes[i] = { x: Math.random() * width, y: 0, r: f.r, d: f.d, opacity: f.opacity };
+                }
+            }
+        }
+
+        function animateSnow() {
+            drawSnow();
+            requestAnimationFrame(animateSnow);
+        }
+
+        window.onload = function() {
+            resizeCanvas();
+            createFlakes();
+            animateSnow();
+        };
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            createFlakes();
+        });
+    </script>
+</body>
+</html>
